@@ -6,14 +6,33 @@ import {
   PermissionStatus,
   useForegroundPermissions,
 } from "expo-location";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getMapPreview } from "../../util/location";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 
 function LocationPicker() {
   const [pickedLocation, setPickedLocation] = useState();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const isFocused = useIsFocused();
 
   const [locationPermissionInformation, requestPermission] =
     useForegroundPermissions();
+
+  useEffect(() => {
+    if (isFocused && route.params) {
+      const mapPickedLocation = route.params && {
+        lat: route.params.pickedLat,
+        lng: route.params.pickedLng,
+      };
+      setPickedLocation(mapPickedLocation);
+    }
+  }, [route, isFocused]);
   async function verifyPermissions() {
     if (
       locationPermissionInformation.status === PermissionStatus.UNDETERMINED
@@ -48,13 +67,15 @@ function LocationPicker() {
 
     console.log(pickedLocation);
   }
-  function pickLocationHandler() {}
+  function pickLocationHandler() {
+    navigation.navigate("Map");
+  }
 
   let locationPreview = <Text>No location picked yet.</Text>;
   if (pickedLocation) {
     locationPreview = (
       <Image
-      style={styles.image}
+        style={styles.image}
         source={{
           uri: getMapPreview(pickedLocation.lat, pickedLocation.lng),
         }}
@@ -85,6 +106,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.primary100,
     borderRadius: 4,
+    overflow: "hidden",
   },
   actions: {
     flexDirection: "row",
@@ -94,6 +116,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    borderRadius: 4,
   },
 });
 
