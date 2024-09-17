@@ -4,6 +4,7 @@ import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
 import Button from "../UI/Button";
+import { getAddress } from "../../util/location";
 
 function PlaceForm() {
   const [enteredTitle, setEnteredTitle] = useState("");
@@ -17,7 +18,6 @@ function PlaceForm() {
     console.log(enteredTitle);
     console.log(selectedImage);
     console.log(pickedLocation);
-
 
   }
 

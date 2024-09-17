@@ -7,7 +7,7 @@ import {
   useForegroundPermissions,
 } from "expo-location";
 import { useEffect, useState } from "react";
-import { getMapPreview } from "../../util/location";
+import { getAddress, getMapPreview } from "../../util/location";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   useIsFocused,
@@ -35,8 +35,18 @@ function LocationPicker({ onPickLocation }) {
   }, [route, isFocused]);
 
   useEffect(() => {
-    onPickLocation(pickedLocation);
-  }, [pickedLocation,onPickLocation]);
+    async function handleLocation() {
+      
+      if (pickedLocation) {
+        const address = await getAddress(
+          pickedLocation.lat,
+          pickedLocation.lng
+        );
+        onPickLocation({ ...pickedLocation, address: address });
+      }
+    }
+    handleLocation();
+  }, [pickedLocation, onPickLocation]);
 
   async function verifyPermissions() {
     if (
@@ -63,14 +73,12 @@ function LocationPicker({ onPickLocation }) {
       return;
     }
     const location = await getCurrentPositionAsync();
-    // console.log(location);
 
     setPickedLocation({
       lat: location.coords.latitude,
       lng: location.coords.longitude,
     });
 
-    console.log(pickedLocation);
   }
   function pickLocationHandler() {
     navigation.navigate("Map");
