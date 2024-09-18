@@ -3,16 +3,25 @@ import { Alert, Button, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import IconButton from "../components/UI/IconButton";
 
-function Map({ navigation }) {
-  const [selectedLocation, setSelectedLocation] = useState();
+function Map({ navigation, route }) {
+  const initialLocation = route.params && {
+    lat: route.params.initialLat,
+    lng: route.params.initialLng,
+  };
+
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
+
   const region = {
-    latitude: 6.8045783,
-    longitude: 79.895675,
+    latitude: initialLocation ? initialLocation.lat : 6.8045783,
+    longitude: initialLocation ? initialLocation.lng : 79.895675,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   };
 
   function selectLocationHandler(event) {
+    if (initialLocation) {
+      return;
+    }
     const lat = event.nativeEvent.coordinate.latitude;
     const lng = event.nativeEvent.coordinate.longitude;
     setSelectedLocation({ lat: lat, lng: lng });
@@ -31,15 +40,18 @@ function Map({ navigation }) {
       pickedLat: selectedLocation.lat,
       pickedLng: selectedLocation.lng,
     });
-  },[navigation,selectedLocation]);
+  }, [navigation, selectedLocation]);
 
   useLayoutEffect(() => {
+    if (initialLocation) {
+      return;
+    }
     navigation.setOptions({
       headerRight: ({ tintColor }) => (
         <IconButton icon="save" size={24} onPress={savePickedLocationHandler} />
       ),
     });
-  }, [navigation, savePickedLocationHandler]);
+  }, [navigation, savePickedLocationHandler, initialLocation]);
 
   return (
     <MapView
